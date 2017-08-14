@@ -25,7 +25,7 @@ from pascal_voc_eval import voc_eval, voc_eval_sds
 from ds_utils import unique_boxes, filter_small_boxes
 
 class LIDC(IMDB):
-    def __init__(self, image_set, root_path, devkit_path, result_path=None, mask_size=-1, binary_thresh=None):
+    def __init__(self, image_set, root_path,data_path,fold,result_path,mask_size=-1,binary_thresh=None):
         """
         fill basic information to initialize imdb
         :param image_set: 2007_trainval, 2007_test, etc
@@ -33,12 +33,13 @@ class LIDC(IMDB):
         :param devkit_path: data and results
         :return: imdb object
         """
-        super(PascalVOC, self).__init__(dataset_name,image_set, root_path, devkit_path, result_path)  # set self.name
-
-        self.year = year
+        super(LIDC, self).__init__(image_set,root_path,data_path,fold,result_path)  # set self.name
         self.root_path = root_path
-        self.devkit_path = devkit_path
-        self.data_path = os.path.join(devkit_path, 'VOC' + year)
+        self.data_path = data_path
+        self.fold_list = fold.split(',')
+        self.image_set = image_set
+        self.name = 'LIDC'
+        #self.cache_path = os.path.join(self.root_path,'cache')
 
         self.classes = ['__background__',  # always index 0
                         'nodule']
@@ -58,10 +59,14 @@ class LIDC(IMDB):
         find out which indexes correspond to given image set (train or val)
         :return:
         """
-        image_set_index_file = os.path.join(self.data_path, 'ImageSets', 'Main', self.image_set + '.txt')
-        assert os.path.exists(image_set_index_file), 'Path does not exist: {}'.format(image_set_index_file)
-        with open(image_set_index_file) as f:
-            image_set_index = [x.strip() for x in f.readlines()]
+        image_set_index_files = list()
+        for fold in self.fold_list:
+            image_set_index_files.append(os.path.join(self.data_path,'ImageSets',fold,self.image_set+'.txt'))
+        image_set_index = list()
+        for image_set_index_file in image_set_index_files:
+            with open(image_set_index_file) as f:
+                for x in f.readlines():
+                    image_set_index.append(x[0:-1])
         return image_set_index
 
     def image_path_from_index(self, index):
@@ -108,6 +113,7 @@ class LIDC(IMDB):
         return ground truth image regions database
         :return: imdb[image_index]['boxes', 'gt_classes', 'gt_overlaps', 'flipped']
         """
+        print(self.cache_path)
         cache_file = os.path.join(self.cache_path, self.name + '_gt_segdb.pkl')
         if os.path.exists(cache_file):
             with open(cache_file, 'rb') as fid:

@@ -68,8 +68,10 @@ def train_net(args, ctx, pretrained, epoch, prefix, begin_epoch, end_epoch, lr, 
     logger.info('training config:{}\n'.format(pprint.pformat(config)))
 
     # load dataset and prepare imdb for training
-    image_sets = [iset for iset in config.dataset.image_set.split('+')]
+    image_sets = [config.dataset.image_set]
+    
     roidbs = [load_gt_roidb(config.dataset.dataset, image_set, config.dataset.root_path, config.dataset.dataset_path,
+                            config.dataset.train_fold,
                             flip=config.TRAIN.FLIP)
               for image_set in image_sets]
     roidb = merge_roidb(roidbs)

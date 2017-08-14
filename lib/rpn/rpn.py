@@ -92,7 +92,7 @@ def assign_anchor(feat_shape, gt_boxes, im_info, cfg, feat_stride=16,
             ret[inds, :] = data
         return ret
 
-    DEBUG = False
+    DEBUG = True
     im_info = im_info[0]
     scales = np.array(scales, dtype=np.float32)
     base_anchors = generate_anchors(base_size=feat_stride, ratios=list(ratios), scales=scales)
@@ -100,6 +100,7 @@ def assign_anchor(feat_shape, gt_boxes, im_info, cfg, feat_stride=16,
     feat_height, feat_width = feat_shape[-2:]
 
     if DEBUG:
+        print '############################# start ###############################'
         print 'anchors:'
         print base_anchors
         print 'anchor shapes:'
@@ -109,6 +110,9 @@ def assign_anchor(feat_shape, gt_boxes, im_info, cfg, feat_stride=16,
         print 'height', feat_height, 'width', feat_width
         print 'gt_boxes shape', gt_boxes.shape
         print 'gt_boxes', gt_boxes
+        print 'gt_boxes shape:'
+        print np.hstack((gt_boxes[:, 2] - gt_boxes[:, 0] +1,
+                         gt_boxes[:, 3] - gt_boxes[:, 1] + 1))
 
     # 1. generate proposals from bbox deltas and shifted anchors
     shift_x = np.arange(0, feat_width) * feat_stride
@@ -209,14 +213,17 @@ def assign_anchor(feat_shape, gt_boxes, im_info, cfg, feat_stride=16,
     bbox_weights = _unmap(bbox_weights, total_anchors, inds_inside, fill=0)
 
     if DEBUG:
-        print 'rpn: max max_overlaps', np.max(max_overlaps)
-        print 'rpn: num_positives', np.sum(labels == 1)
-        print 'rpn: num_negatives', np.sum(labels == 0)
-        _fg_sum = np.sum(labels == 1)
-        _bg_sum = np.sum(labels == 0)
-        _count = 1
-        print 'rpn: num_positive avg', _fg_sum / _count
-        print 'rpn: num_negative avg', _bg_sum / _count
+        #print(gt_boxes.shape)
+        if(gt_boxes.shape[0]!=0):
+            print 'rpn: max max_overlaps', np.max(max_overlaps)
+            print 'rpn: num_positives', np.sum(labels == 1)
+            print 'rpn: num_negatives', np.sum(labels == 0)
+            _fg_sum = np.sum(labels == 1)
+            _bg_sum = np.sum(labels == 0)
+            _count = 1
+            print 'rpn: num_positive avg', _fg_sum / _count
+            print 'rpn: num_negative avg', _bg_sum / _count
+            print '############################# end ###############################'
 
     labels = labels.reshape((1, feat_height, feat_width, A)).transpose(0, 3, 1, 2)
     labels = labels.reshape((1, A * feat_height * feat_width))

@@ -35,15 +35,17 @@ config.network.RCNN_FEAT_STRIDE = 16
 config.network.FIXED_PARAMS = ['gamma', 'beta']
 config.network.FIXED_PARAMS_SHARED = ['gamma', 'beta']
 config.network.ANCHOR_SCALES = (4, 6, 10,16,22,32)
-config.network.ANCHOR_RATIOS = (1)
+config.network.ANCHOR_RATIOS = (1,)
 config.network.NUM_ANCHORS = len(config.network.ANCHOR_SCALES) * len(config.network.ANCHOR_RATIOS)
 
 # dataset related params
 config.dataset = edict()
 config.dataset.dataset = 'LIDC-IDRI'
-config.dataset.image_set = 'LIDC-IDRI_trainval'
-config.dataset.test_image_set = 'LIDC_IDRI_test'
+#config.dataset.image_set = 
+#config.dataset.test_image_set = 'LIDC_IDRI_test'
 config.dataset.root_path = './data'
+config.dataset.train_fold = "fold1,fold2,fold3,fold4,fold5,fold6,fold7,fold8,fold9"
+config.dataset.test_fold = 'fold10'
 config.dataset.dataset_path = './data/VOCdevkit'
 config.dataset.NUM_CLASSES = 2
 

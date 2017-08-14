@@ -2,8 +2,10 @@ import numpy as np
 import os
 import cv2
 import random
+import scipy.io as sio
 from PIL import Image
 from bbox.bbox_transform import clip_boxes
+
 
 
 # TODO: This two functions should be merged with individual data loader
@@ -23,7 +25,8 @@ def get_image(roidb, config):
     for i in range(num_images):
         roi_rec = roidb[i]
         assert os.path.exists(roi_rec['image']), '%s does not exist'.format(roi_rec['image'])
-        im = cv2.imread(roi_rec['image'], cv2.IMREAD_COLOR|cv2.IMREAD_IGNORE_ORIENTATION)
+        #im = cv2.imread(roi_rec['image'], cv2.IMREAD_COLOR|cv2.IMREAD_IGNORE_ORIENTATION)
+        im = np.array(sio.loadmat(roi_rec['image']).values()[2],dtype=np.float32)
         if roidb[i]['flipped']:
             im = im[:, ::-1, :]
         new_rec = roi_rec.copy()

@@ -24,7 +24,7 @@ class resnet_v1_101_rcnn_dcn(Symbol):
         self.units = (3, 4, 23, 3)  # use for 101
         self.filter_list = [256, 512, 1024, 2048]
 
-    def get_resnet_v1_conv3(self, data):
+    def get_resnet_v1_conv2(self, data):
         conv1 = mx.symbol.Convolution(name='conv1', data=data, num_filter=64, pad=(3, 3), kernel=(7, 7), stride=(2, 2),
                                       no_bias=True)
         bn_conv1 = mx.symbol.BatchNorm(name='bn_conv1', data=conv1, use_global_stats=True, fix_gamma=False,
@@ -103,6 +103,8 @@ class resnet_v1_101_rcnn_dcn(Symbol):
         scale2c_branch2c = bn2c_branch2c
         res2c = mx.symbol.broadcast_add(name='res2c', *[res2b_relu, scale2c_branch2c])
         res2c_relu = mx.symbol.Activation(name='res2c_relu', data=res2c, act_type='relu')
+        return res2c_relu
+    def get_resnet_v1_conv3(self,res2c_relu):
         res3a_branch1 = mx.symbol.Convolution(name='res3a_branch1', data=res2c_relu, num_filter=512, pad=(0, 0),
                                               kernel=(1, 1), stride=(2, 2), no_bias=True)
         bn3a_branch1 = mx.symbol.BatchNorm(name='bn3a_branch1', data=res3a_branch1, use_global_stats=True,
@@ -788,12 +790,14 @@ class resnet_v1_101_rcnn_dcn(Symbol):
             im_info = mx.sym.Variable(name="im_info")
 
         # shared convolutional layers
-        conv_feat = self.get_resnet_v1_conv3(data)
-        relu0 = self.get_resnet_v1_conv4(conv_feat)
+        #data = mx.sym.BatchNorm(data=data,eps=self.eps,fix_gamma=True,use_global_stats=True,name='data_norm')
+        conv2_feat = self.get_resnet_v1_conv2(data)
+        conv3_feat = self.get_resnet_v1_conv3(conv2_feat)
         # res5
-        relu1 = self.get_resnet_v1_conv5(relu0)
+        conv4_feat = self.get_resnet_v1_conv4(conv3_feat)
+        relu1 = self.get_resnet_v1_conv5(conv4_feat)
 
-        rpn_cls_score, rpn_bbox_pred = self.get_rpn(conv_feat, num_anchors)
+        rpn_cls_score, rpn_bbox_pred = self.get_rpn(conv2_feat, num_anchors)
 
         if is_train:
             # prepare rpn data
@@ -987,6 +991,7 @@ class resnet_v1_101_rcnn_dcn(Symbol):
         # config alias for convenient
         num_classes = cfg.dataset.NUM_CLASSES
         num_reg_classes = (2 if cfg.CLASS_AGNOSTIC else num_classes)
+
 
         # input init
         if is_train:
