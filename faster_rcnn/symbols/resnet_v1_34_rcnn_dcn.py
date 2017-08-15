@@ -1,8 +1,12 @@
 
 import mxnet as mx
 import cPickle
+from utils.symbol import Symbol
+from operator_py.proposal import *
+from operator_py.proposal_target import *
+from operator_py.box_annotator_ohem import *
 
-class resnet_v1_34_rcnn():
+class resnet_v1_34_rcnn_dcn(Symbol):
     def __init__(self):
         self.filter_list = [64,64,128,256]
         self.units = [3,4,6,3]
@@ -70,8 +74,8 @@ class resnet_v1_34_rcnn():
         deconv1 = mx.sym.Deconvolution(data=data,num_filter=256,kernel=(2,2),stride=(2,2),name='deconv1')
         stage1 = self.residual_unit(deconv1,256,(1,1),True,name='deconv_stage1',bottle_neck=self.bottle_neck,
                                     workspace=self.workspace,memonger=self.memonger)
-        deconv2 = mx.sym.Deconvolution(data=stage1,num_filter=128,kernel=(2,2),stride=(2,2),name='deconv2')
-        stage2 = self.residual_unit(deconv2,128,(1,1),True,name='deconv_stage2',bottle_neck=self.bottle_neck,
+        deconv2 = mx.sym.Deconvolution(data=stage1,num_filter=256,kernel=(2,2),stride=(2,2),name='deconv2')
+        stage2 = self.residual_unit(deconv2,256,(1,1),True,name='deconv_stage2',bottle_neck=self.bottle_neck,
                                     workspace=self.workspace,memonger=self.memonger)
         return stage2
     def get_rpn(self, conv_feat, num_anchors):
@@ -186,7 +190,7 @@ class resnet_v1_34_rcnn():
         roi_pool = mx.symbol.ROIPooling(
                         name='roi_pool5', data=conv_feat, rois=rois, pooled_size=(7, 7), spatial_scale=0.25)        
         relu0 = self.resnet_v1_conv5(roi_pool)
-        pool0 = mx.sym.Pool(data=relu0,kernel=(7,7),global_pool=True,pool_type='avg',name='global_pool')
+        pool0 = mx.sym.Pooling(data=relu0,kernel=(7,7),global_pool=True,pool_type='avg',name='global_pool')
         flat = mx.sym.flatten(data=pool0,name='flatten')
         # cls_score/bbox_pred
         cls_score = mx.sym.FullyConnected(name='cls_score', data=flat, num_hidden=num_classes)
