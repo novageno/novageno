@@ -142,6 +142,7 @@ def sample_rois(rois, fg_rois_per_image, rois_per_image, num_classes, cfg,
     # guard against the case when an image has fewer than fg_rois_per_image foreground RoIs
     fg_rois_per_this_image = np.minimum(fg_rois_per_image, fg_indexes.size)
     # Sample foreground regions without replacement
+    print(len(fg_indexes))
     if len(fg_indexes) > fg_rois_per_this_image:
         fg_indexes = npr.choice(fg_indexes, size=fg_rois_per_this_image, replace=False)
 
@@ -151,6 +152,7 @@ def sample_rois(rois, fg_rois_per_image, rois_per_image, num_classes, cfg,
     bg_rois_per_this_image = rois_per_image - fg_rois_per_this_image
     bg_rois_per_this_image = np.minimum(bg_rois_per_this_image, bg_indexes.size)
     # Sample foreground regions without replacement
+    #print(len(bg_indexes))
     if len(bg_indexes) > bg_rois_per_this_image:
         bg_indexes = npr.choice(bg_indexes, size=bg_rois_per_this_image, replace=False)
 

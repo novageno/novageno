@@ -164,8 +164,8 @@ def train_net(args, ctx, pretrained, epoch, prefix, begin_epoch, end_epoch, lr, 
 
 def main():
     print('Called with argument:', args)
-    #ctx = [mx.gpu(int(i)) for i in config.gpus.split(',')]
-    ctx = [mx.cpu()]
+    ctx = [mx.gpu(int(i)) for i in config.gpus.split(',')]
+    #ctx = [mx.cpu()]
     train_net(args, ctx, config.network.pretrained, config.network.pretrained_epoch, config.TRAIN.model_prefix,
               config.TRAIN.begin_epoch, config.TRAIN.end_epoch, config.TRAIN.lr, config.TRAIN.lr_step)
 

@@ -20,7 +20,7 @@ from core.tester import Predictor, pred_eval
 from utils.load_model import load_param
 
 
-def test_rcnn(cfg, dataset, image_set, root_path, dataset_path,
+def test_rcnn(cfg, dataset, image_set, root_path, dataset_path,fold,
               ctx, prefix, epoch,
               vis, ignore_cache, shuffle, has_rpn, proposal, thresh, logger=None, output_path=None):
     if not logger:
@@ -34,7 +34,7 @@ def test_rcnn(cfg, dataset, image_set, root_path, dataset_path,
     if has_rpn:
         sym_instance = eval(cfg.symbol + '.' + cfg.symbol)()
         sym = sym_instance.get_symbol(cfg, is_train=False)
-        imdb = eval(dataset)(image_set, root_path, dataset_path, result_path=output_path)
+        imdb = eval(dataset)(image_set, root_path, dataset_path,fold,result_path=output_path)
         roidb = imdb.gt_roidb()
     else:
         sym_instance = eval(cfg.symbol + '.' + cfg.symbol)()

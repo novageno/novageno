@@ -48,10 +48,10 @@ def bbox_overlaps_cython(
                     max(boxes[n, 1], query_boxes[k, 1]) + 1
                 )
                 if ih > 0:
-                    ua = float(
-                        (boxes[n, 2] - boxes[n, 0] + 1) *
-                        (boxes[n, 3] - boxes[n, 1] + 1) +
-                        box_area - iw * ih
-                    )
-                    overlaps[n, k] = iw * ih / ua
+                    #ua = float(
+                     #   (boxes[n, 2] - boxes[n, 0] + 1) *
+                      #  (boxes[n, 3] - boxes[n, 1] + 1) +
+                       # box_area - iw * ih
+                    #)
+                    overlaps[n, k] = iw * ih / box_area
     return overlaps
